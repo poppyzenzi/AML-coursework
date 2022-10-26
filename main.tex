@@ -5,9 +5,10 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{hyperref}
+\usepackage[table]{xcolor}% http://ctan.org/pkg/xcolor
 \graphicspath{{images/}}
 
-\title{Applied Machine Learning - Exploratory Sentiment Analysis}
+\title{Applied Machine Learning - Sentiment Analysis}
 \author{Poppy Z Grimes, Pinar Batat Buke, Zhifan Sun}
 \date{November 2022}
 
@@ -17,19 +18,18 @@
 
 \section{Task description}
 
-Sentiment analysis is an important method within the sphere of natural language processing (NLP) to classify the positive or negative feeling within human text or speech. In the context of machine learning algorithms, sentiment analysis can be performed using both supervised and unsupervised methods. 
+This project performs an exploratory sentiment analysis on film reviews in the Stanford Sentiment Treebank (SST-5) dataset with some supplementary datasets. We apply various supervised and unsupervised classification models to assess their performance in determining sentiment of online film reviews. We approach this by generating models for binary and multiclass classification. We explore the difference in performance when feeding models with input features from full sentences or phrases. The highest performing model is then optimised to enhance performance. 
 
-This project presents an exploratory analysis on the Stanford Sentiment Treebank (SST-5) dataset. We apply and build various task-based and feature-based algorithms and assess their performance in determining sentiment of online film reviews. We approach this by testing both full sentences and phrases. In addition, we explore how various pre-processing techniques effect our outcomes. This includes lemmetisation, human subjectivity etc. %edit here
+ In addition, we demonstrate how pre-processing techniques effect our outcomes. This includes lemmetisation and human sentiment subjectivity. Ultimately, we investigate whether we can build accurate models for fine-grained sentiment from this data. %does it outperform binary?
 
-Our primary aim is to build a model that can predict sentiment of sentences in the SST-5 dataset. To do this we will explore various algorithms and identify the one with the highest accuracy. Our work will compare outputs with previous work.
-%compared with human based classifier?
-
-Our secondary aim is to discuss the effect of data-preprocessing and formatting on the analysis. Methods incorporated include lemmetisation...
 
 
 \section{Background and related work}
-The SST-5 dataset is a repository of x %number?
-film reviews from RottenTomatoes.com. The repository is organised into several files which split the data into sentences or phrases. Phrases from reviews have human-assigned sentiment scores where participants were asked to score on a continuous sliding scale seen in figure \ref{fig:sentiment_scale}.
+
+%SST dataset, how files are split, previous wok on it 
+%what is sentiment analysis 
+
+The SST-5 dataset is a repository of 11855 film review sentences from RottenTomatoes.com. The repository is organised into several files which split the data into sentences or phrases. Phrases from reviews have human-assigned sentiment scores where participants were asked to score on a continuous sliding scale seen in figure \ref{fig:sentiment_scale}.
 
 \begin{wrapfigure}{l}{0.3\textwidth}
     \begin{center}
@@ -51,19 +51,17 @@ Bag of words is a popular method which tracks the polarity of individual words. 
 
 
 
-
-
-
-
-
-
 \section{Task significance}
 
+Sentiment analysis is one of the cornerstones of natural language processing (NLP) to classify the positive or negative feeling within human text or speech. In the context of machine learning algorithms, sentiment analysis can be performed using both supervised and unsupervised methods. 
+
+Sentiment analysis is a popular tool used by businesses to gain insight into customer preferences, make suggestions based on consumer opinion and understand patterns and trends in social media. Fine-graining sentiment analysis is particularly challenging due to the nuances, rule exceptions and other linguistic features of the English - and in fact every - language. Understanding human behaviour and opinion is extremely valuable for those wanting to apply such data into marketing, social, political and other applications. Machine learning has wielded such endeavours with the tools to do so.
+
+The diversity of machine learning techniques, and by their nature, means that we can arrive at almost the same outputs given various inputs and models. Therefore, determining the best performing model in terms of speed, accuracy and optimisation is the crux of most exploratory analyses. The rationale of this work is build on that notion where we are taking multiple approaches to the same question see how we can arrive optimally to our solutions. 
 
 
 
-
-
+%can we choose best classifier to put in any new data point x and accurately assign it to a binary or multiclass feature label 
 
 
 
@@ -85,9 +83,9 @@ Bag of words is a popular method which tracks the polarity of individual words. 
     \item Create a dataframe with columns: $['id', 'phrase', 'lemma', 'key\_words', 'label'],$ where $key\Uwords$ column contain the verbs, adjective and adverb of each phrase.
 \end{enumerate}
     
+    lemma provides highest value information
     
-    
-    
+    %sentiment score is weighted from [0,1] put into binary or discrete classes by *5 probabiliy
 
 \subsection{Sentence pre-processing}
 
@@ -95,6 +93,8 @@ Bag of words is a popular method which tracks the polarity of individual words. 
 The provided data set assigns sentiment scores only to individual phrases, or n-grams. For the purpose of our supervised analysis, we need sentiment labels for full sentences. The first method we have chosen is to manually score (human-based) a random sample of n=100 sentences as positive or negative. This will be a test dataset.
 
 A second method we explore is using the x function in NLTK library which generates a portfolio of scores for each datapoint for positive, neutral and negative. From this we compute a compound score in the range [0,1]. 
+
+%sentences not lablled: two methods human and external NLTK package with compound score and perform supervised classification on compound score
 
 
 
@@ -201,52 +201,78 @@ To choose our input features we selected the 16 most frequent words from each cl
 
 
 \subsection{Sentence Analysis}
-We use an \href{http://ai.stanford.edu/~amaas/data/sentiment/}{external dataset} \cite{maas2011learning} to train our model for the sentence-based analysis as sentences are unlabelled in the SST-5 and we only had capacity on this occasion to hand-label 100. Our training dataset is from the IMDB movie review platform with n = 25,000 datapoints (sentences) labelled as positive or negative, following the same structure and inputs of our test data. We initially split the IMDB data into test (80\%) and train (20\%) before testing with the SST-5 data.
+We use an \href{http://ai.stanford.edu/~amaas/data/sentiment/}{external dataset} \cite{maas2011learning} to train our model for the sentence-based analysis as sentences are unlabelled in the SST-5 and we only had capacity on this occasion to hand-label 100. Our training dataset is from the IMDB movie review platform with n = 25,000 datapoints (sentences) labelled as positive or negative, following the same structure and inputs of our test data. We initially split the IMDB data into test (80\%) and train (20\%) before testing with our human-labelled the SST-5 data.
+
 
 
 
 
 \section{Description of learning methods used}
 
-Supervised training models
+\subsection{Supervised models}
 \begin{itemize}
-    \item Naive Bayes'
-    \item Logistic Regression
-    \item Decision Tree
-    \item Random Forest
+    \item \textbf{Naive Bayes (NB)} - A generative linear classifier built on Bayes' theorem which predicts the probability of class label $Y$ given input features $X$. This is indirectly computed through the likelihood $P(X|Y)$ and prior $P(Y)$. Assumption: Features are independent and identically distributed (IID) given the class. Advantage: Fast and powerful on smaller datasets.
+    
+    \item \textbf{Logistic Regression (LR)} - [binary] A discriminative linear classifier that directly computes $P(Y|X)$ using weighted input features $w_{i}x_{i}$ and the sigmoid function $σ(z) = 1/(1+e^-^z))$ where $z$ is the sum of weighted features plus the bias term (scalar intercept). Data is normalised between [0,1] and a decision boundary (classification threshold, usually 0.5) predicts $P(Y|X)$. Advantage: Splits weights between input features that correlate, therefore doesn't assume independence. \\
+    
+    [multinomial] For multiple classes, multinomial LR uses one-hot vectors as the output $Y$. The classifier predicts $\hat{y}$ given $x_{i}$ from probabilities of one-hot vectors.
+    
+    \item \textbf{Decision Tree (DT} - A non-linear method which iteratively partitions inputs starting with a 'root' node. Inputs descend through top-down questions that split data based on attributes of input features, returning class probabilities at the terminating leaf nodes. Thresholds of each branch are established by measuring node entropy, where the aim is to minimise entropy to have high purity (data points from same class at same node). Advantage: Fast and clear classification with specified set of input features.
+    
+    \item \textbf{Random Forest (RF)} - An ensemble of $k$ DT's where subsets of data and random feature subsets are split and trained across the various trees. The learning is repeated $k$ times (cross-validation?). Classes of datapoints are predicted from a 'majority vote' across all of the trees. Advantage: Powerful on big data. Pitfall: Longer time, lower interpretability.
 \end{itemize}\\\
 
 
-Unsupervised training models
-\begin{itemize}
-    \item Clustering
-\end{itemize}
 
 \section{Results and evaluation}
-
 \subsection{Performance on sentences}
 
-\subsubsection{Using human-based labelling}
-
-\begin{table}[h]
-\begin{center}
+\begin{wraptable}{r}{80mm}
+\parbox{.45\linewidth}{
+\centering
 \begin{tabular}{||c c c c||} 
  \hline
- Classifier & Accuracy & Col3 & col4 \\ [0.5ex] 
+ Classifier & Accuracy & F1 score &\\ [0.5ex] 
  \hline\hline
- Naive Bayes' & x & x & x \\ 
+ Naive Bayes' & 0.406 & 0.285 &\\ 
  \hline 
- Logistic Regression & x & x & x \\
+ Logistic Regression & \cellcolor{yellow!25}0.723 & 0.724 &\\
  \hline
- Decision Tree & 545 & 778 & 7507 \\
+ Decision Tree & 0.634 & 0.578 &\\
  \hline
- Random Forest & 545 & 18744 & 7560 \\
+ Random Forest & 0.644 & 0.577  &\\
  \hline\hline
 \end{tabular}
-\caption{Results: Unsupervised learning of sentence}
-\label{table:1}
-\end{center}
-\end{table}
+\caption{Human-based}
+\label{table:human}
+}
+
+\parbox{0.45\linewidth}{
+\centering
+\begin{tabular}{||c c c c||} 
+ \hline
+ Classifier & Accuracy & F1 score &\\ [0.5ex] 
+ \hline\hline
+ Naive Bayes' & 0.733 & 0.723 &\\ 
+ \hline 
+ Logistic Regression & \cellcolor{yellow!25}0.876 & 0.876 &\\
+ \hline
+ Decision Tree & 0.718 & 0.717 &\\
+ \hline
+ Random Forest & 0.847 & 0.846  &\\
+ \hline\hline
+\end{tabular}
+\caption{NLTK library}
+\label{table:nltk}
+}
+\end{wraptable}
+
+Results in Table \ref{table:human} and Table \ref{table:nltk} were performed on training data from the IMDB dataset. LR showed highest performance for classifying whole sentence sentiment for both our human-labelled test data (SST-5) and IMDB test data, highlighted in yellow. Sentiment data for words likely includes correlated input features, especially with the combination of adverbs and adjectives which strengthen polarity of sentiment. Poor performance of NB on our human-labelled sentences perhaps reflects the model's IID assumption.
+
+
+
+
+
 
 \subsubsection{Using NLTK compound scores}
 
